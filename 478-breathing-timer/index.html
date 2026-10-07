@@ -47,7 +47,7 @@ button.primary{background:var(--blue);color:#071321}button:active{transform:tran
 .settings{padding:13px;display:grid;gap:10px;text-align:left}.row{display:flex;align-items:center;justify-content:space-between;gap:10px}.row label{font-size:14px}
 select{background:#1e293b;color:#fff;padding:0 12px}input[type=checkbox]{width:21px;height:21px;accent-color:var(--blue)}
 .hint{font-size:11px;color:var(--muted);line-height:1.5;padding:0 8px 4px}
-@media (max-height:760px){.cat-stage{min-height:155px}.cat-svg{width:min(62vw,200px)}.circle{width:min(47vw,190px)}.settings{display:none}}
+@media (max-height:760px){.cat-stage{min-height:150px}.cat-svg{width:min(60vw,190px)}.circle{width:min(45vw,180px)}.settings{padding:10px}.settings .row{min-height:36px}.hint{font-size:10px}}
 </style>
 </head>
 <body>
@@ -124,11 +124,11 @@ select{background:#1e293b;color:#fff;padding:0 12px}input[type=checkbox]{width:2
 
   <div class="buttons">
     <button id="startBtn" class="primary">スタート</button>
-    <button id="resetBtn">リセット</button>
+    <button id="resetBtn">ストップ</button>
   </div>
 
   <section class="settings">
-    <div class="row"><label for="cycles">セット数</label><select id="cycles"><option value="2">2</option><option value="4" selected>4</option><option value="6">6</option><option value="8">8</option></select></div>
+    <div class="row"><label for="cycles">セット数</label><select id="cycles"><option value="2">2回</option><option value="4" selected>4回</option><option value="6">6回</option><option value="8">8回</option><option value="Infinity">∞ ストップまで</option></select></div>
     <div class="row"><label for="sound">切り替え音</label><input id="sound" type="checkbox" checked></div>
     <div class="row"><label for="vibrate">振動</label><input id="vibrate" type="checkbox" checked></div>
     <div class="row"><label for="wake">画面をスリープさせない</label><input id="wake" type="checkbox" checked></div>
@@ -271,7 +271,7 @@ select{background:#1e293b;color:#fff;padding:0 12px}input[type=checkbox]{width:2
     els.circle.className='circle '+(started?p.key:'');
     els.phase.textContent=started?(running?p.label:p.label+'・一時停止'):'準備';
     els.seconds.textContent=started?remaining:'4';
-    els.progress.textContent=completed+' / '+total()+' セット';
+    els.progress.textContent=Number.isFinite(total())?(completed+' / '+total()+' セット'):('∞モード · '+completed+' セット');
     els.start.textContent=running?'一時停止':(started?'再開':'スタート');
     renderCat();
   }
@@ -301,7 +301,7 @@ select{background:#1e293b;color:#fff;padding:0 12px}input[type=checkbox]{width:2
   }
 
   els.start.addEventListener('click',()=>running?pause():start());
-  els.reset.addEventListener('click',reset);
+  els.reset.addEventListener('click',()=>{reset();});
   document.addEventListener('visibilitychange',async()=>{if(document.visibilityState==='visible'&&running)await lockWake()});
 
   startFlip();updateUI();

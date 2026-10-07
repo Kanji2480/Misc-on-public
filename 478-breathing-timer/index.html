@@ -1,103 +1,310 @@
 <!doctype html>
 <html lang="ja">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <meta name="theme-color" content="#0f172a" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <meta name="apple-mobile-web-app-title" content="4-7-8呼吸" />
-  <title>4-7-8 呼吸タイマー</title>
-  <style>
-    :root{--bg:#0f172a;--text:#f8fafc;--muted:#94a3b8;--accent:#60a5fa;--ring:#334155}
-    *{box-sizing:border-box}
-    html,body{height:100%;margin:0}
-    body{
-      font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
-      background:radial-gradient(circle at top,#172554 0%,var(--bg) 45%,#020617 100%);
-      color:var(--text);display:flex;align-items:center;justify-content:center;
-      padding:max(16px,env(safe-area-inset-top)) 16px max(20px,env(safe-area-inset-bottom));
-      -webkit-tap-highlight-color:transparent
-    }
-    .app{width:min(100%,460px);text-align:center;display:flex;flex-direction:column;gap:18px}
-    h1{font-size:clamp(24px,7vw,34px);margin:0;letter-spacing:.02em}
-    .sub{margin-top:-10px;color:var(--muted);font-size:14px}
-    .circle-wrap{display:grid;place-items:center;min-height:300px}
-    .circle{
-      width:min(68vw,290px);aspect-ratio:1;border-radius:50%;display:grid;place-items:center;
-      border:7px solid var(--ring);background:rgba(255,255,255,.035);
-      box-shadow:0 20px 70px rgba(0,0,0,.3),inset 0 0 40px rgba(255,255,255,.03);
-      transition:transform 1s linear,border-color .3s ease,background .3s ease;user-select:none
-    }
-    .circle.inhale{transform:scale(1.08);border-color:#60a5fa;background:rgba(96,165,250,.10)}
-    .circle.hold{transform:scale(1.08);border-color:#a78bfa;background:rgba(167,139,250,.10)}
-    .circle.exhale{transform:scale(.88);border-color:#34d399;background:rgba(52,211,153,.10)}
-    .circle.done{transform:scale(1);border-color:#fbbf24;background:rgba(251,191,36,.08)}
-    .phase{font-size:clamp(30px,10vw,46px);font-weight:800;line-height:1.1}
-    .seconds{font-variant-numeric:tabular-nums;font-size:clamp(60px,18vw,92px);line-height:1;font-weight:900;margin-top:8px}
-    .progress{color:var(--muted);font-size:15px}
-    .buttons{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-    button,select{min-height:54px;border:0;border-radius:16px;font:inherit;font-weight:700}
-    button{cursor:pointer;color:#08111f;background:#f8fafc;padding:14px 16px}
-    button.primary{background:var(--accent);color:#071321}
-    button:active{transform:translateY(1px)}
-    .settings{padding:14px;border-radius:18px;background:rgba(15,23,42,.68);border:1px solid rgba(148,163,184,.18);display:grid;gap:12px;text-align:left}
-    .row{display:flex;align-items:center;justify-content:space-between;gap:12px}
-    .row label{font-size:15px}
-    select{background:#1e293b;color:var(--text);padding:0 14px}
-    input[type="checkbox"]{width:22px;height:22px;accent-color:var(--accent)}
-    .hint{font-size:12px;color:var(--muted);line-height:1.5}
-  </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#101827">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="4-7-8呼吸">
+<title>4-7-8 呼吸タイマー</title>
+<style>
+:root{--bg:#0f172a;--text:#f8fafc;--muted:#94a3b8;--blue:#60a5fa;--violet:#a78bfa;--green:#34d399;--gold:#fbbf24}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%}
+body{
+  font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  background:radial-gradient(circle at top,#1e3a8a 0,#0f172a 43%,#020617 100%);
+  color:var(--text);display:flex;justify-content:center;
+  padding:max(14px,env(safe-area-inset-top)) 14px max(24px,env(safe-area-inset-bottom));
+  -webkit-tap-highlight-color:transparent
+}
+.app{width:min(100%,440px);display:flex;flex-direction:column;gap:14px;text-align:center}
+h1{font-size:clamp(24px,7vw,32px);margin:6px 0 0}.sub{font-size:13px;color:var(--muted)}
+.card,.settings{background:rgba(15,23,42,.72);border:1px solid rgba(148,163,184,.18);border-radius:22px}
+.card{padding:12px 10px 16px;overflow:hidden}
+.bubble{display:inline-block;background:#fff;color:#1f2937;border-radius:999px;padding:8px 15px;font-size:18px;font-weight:850;box-shadow:0 7px 20px rgba(0,0,0,.18)}
+.bubble small{display:block;font-size:11px;font-weight:700;color:#64748b;margin-top:2px}
+.cat-stage{display:grid;place-items:center;min-height:190px}
+.cat-svg{width:min(75vw,240px);height:auto;filter:drop-shadow(0 9px 16px rgba(0,0,0,.2));overflow:visible}
+.timer-wrap{display:grid;place-items:center;margin-top:-2px}
+.circle{
+  width:min(56vw,230px);aspect-ratio:1;border-radius:50%;display:grid;place-items:center;
+  border:7px solid #334155;background:rgba(255,255,255,.035);
+  box-shadow:0 16px 50px rgba(0,0,0,.26),inset 0 0 36px rgba(255,255,255,.03);
+  transition:transform .7s linear,border-color .25s,background .25s
+}
+.circle.inhale{transform:scale(1.06);border-color:var(--blue);background:rgba(96,165,250,.10)}
+.circle.hold{transform:scale(1.06);border-color:var(--violet);background:rgba(167,139,250,.10)}
+.circle.exhale{transform:scale(.92);border-color:var(--green);background:rgba(52,211,153,.10)}
+.circle.done{border-color:var(--gold);background:rgba(251,191,36,.08)}
+.phase{font-size:clamp(25px,8vw,36px);font-weight:900;line-height:1}.seconds{font-size:clamp(55px,17vw,78px);font-weight:950;line-height:1.05;font-variant-numeric:tabular-nums;margin-top:6px}
+.progress{font-size:14px;color:var(--muted)}
+.buttons{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+button,select{border:0;border-radius:16px;min-height:52px;font:inherit;font-weight:800}
+button{background:#f8fafc;color:#0f172a;padding:13px 14px;cursor:pointer}
+button.primary{background:var(--blue);color:#071321}button:active{transform:translateY(1px)}
+.settings{padding:13px;display:grid;gap:10px;text-align:left}.row{display:flex;align-items:center;justify-content:space-between;gap:10px}.row label{font-size:14px}
+select{background:#1e293b;color:#fff;padding:0 12px}input[type=checkbox]{width:21px;height:21px;accent-color:var(--blue)}
+.hint{font-size:11px;color:var(--muted);line-height:1.5;padding:0 8px 4px}
+@media (max-height:760px){.cat-stage{min-height:155px}.cat-svg{width:min(62vw,200px)}.circle{width:min(47vw,190px)}.settings{display:none}}
+</style>
 </head>
 <body>
-  <main class="app">
-    <div>
-      <h1>4-7-8 呼吸</h1>
-      <div class="sub">吸う 4秒 · 止める 7秒 · 吐く 8秒</div>
+<main class="app">
+  <div><h1>4-7-8 呼吸</h1><div class="sub">吸う 4秒 · 止める 7秒 · 吐く 8秒</div></div>
+
+  <section class="card">
+    <div id="bubble" class="bubble">にゃ〜<small>いっしょに呼吸しよう</small></div>
+    <div class="cat-stage">
+      <svg class="cat-svg" viewBox="0 0 260 220" aria-hidden="true">
+        <g id="sparkles" opacity=".16">
+          <path d="M42 54 l4 8 8 4-8 4-4 8-4-8-8-4 8-4z" fill="#fde68a"/>
+          <path d="M210 46 l3 6 6 3-6 3-3 6-3-6-6-3 6-3z" fill="#bfdbfe"/>
+          <circle cx="214" cy="89" r="4" fill="#f9a8d4"/>
+        </g>
+
+        <g id="wind" opacity="0">
+          <path d="M174 112 C194 108 208 110 223 104" stroke="#a7f3d0" stroke-width="5" stroke-linecap="round" fill="none"/>
+          <path d="M178 126 C197 122 214 125 230 118" stroke="#6ee7b7" stroke-width="4" stroke-linecap="round" fill="none"/>
+        </g>
+
+        <ellipse id="shadow" cx="130" cy="192" rx="59" ry="11" fill="#020617" opacity=".28"/>
+
+        <path id="tailBack" d="M179 150 C213 145 218 113 197 98" stroke="#e8ad77" stroke-width="18" stroke-linecap="round" fill="none"/>
+        <path id="tailLine" d="M179 150 C213 145 218 113 197 98" stroke="#8b5e3c" stroke-width="2.5" stroke-linecap="round" fill="none" opacity=".45"/>
+
+        <g id="catBody">
+          <ellipse id="body" cx="130" cy="143" rx="52" ry="42" fill="#f4c89f"/>
+          <ellipse id="belly" cx="130" cy="150" rx="28" ry="22" fill="#fff4e6"/>
+          <ellipse id="pawL" cx="88" cy="137" rx="17" ry="11" fill="#efbc8b"/>
+          <ellipse id="pawR" cx="172" cy="137" rx="17" ry="11" fill="#efbc8b"/>
+          <ellipse id="footL" cx="111" cy="178" rx="15" ry="9" fill="#efbc8b"/>
+          <ellipse id="footR" cx="149" cy="178" rx="15" ry="9" fill="#efbc8b"/>
+        </g>
+
+        <g id="catHead">
+          <path d="M91 79 L101 42 L119 73 Z" fill="#f4c89f"/>
+          <path d="M141 73 L159 42 L169 79 Z" fill="#f4c89f"/>
+          <path d="M99 68 L103 52 L112 69 Z" fill="#f9a8d4"/>
+          <path d="M148 69 L157 52 L161 68 Z" fill="#f9a8d4"/>
+          <circle cx="130" cy="91" r="45" fill="#f4c89f"/>
+
+          <path d="M111 65 Q117 58 123 65" stroke="#d5945e" stroke-width="4.5" stroke-linecap="round" fill="none"/>
+          <path d="M137 65 Q143 58 149 65" stroke="#d5945e" stroke-width="4.5" stroke-linecap="round" fill="none"/>
+          <path d="M96 87 Q103 81 110 87" stroke="#d5945e" stroke-width="4" stroke-linecap="round" fill="none"/>
+          <path d="M150 87 Q157 81 164 87" stroke="#d5945e" stroke-width="4" stroke-linecap="round" fill="none"/>
+
+          <circle id="eyeOpenL" cx="113" cy="91" r="4.7" fill="#374151"/>
+          <circle id="eyeOpenR" cx="147" cy="91" r="4.7" fill="#374151"/>
+          <path id="eyeClosedL" d="M106 92 Q113 87 120 92" stroke="#374151" stroke-width="3.5" stroke-linecap="round" fill="none" opacity="0"/>
+          <path id="eyeClosedR" d="M140 92 Q147 87 154 92" stroke="#374151" stroke-width="3.5" stroke-linecap="round" fill="none" opacity="0"/>
+
+          <ellipse cx="98" cy="103" rx="9" ry="5.5" fill="#f9a8d4" opacity=".5"/>
+          <ellipse cx="162" cy="103" rx="9" ry="5.5" fill="#f9a8d4" opacity=".5"/>
+          <path d="M130 98 l-6 5 h12z" fill="#f18bb2"/>
+
+          <path id="mouthSmile" d="M123 108 Q130 115 137 108" stroke="#374151" stroke-width="3.2" stroke-linecap="round" fill="none"/>
+          <ellipse id="mouthO" cx="130" cy="111" rx="5.2" ry="7.2" fill="#374151" opacity="0"/>
+          <path id="mouthFlat" d="M124 111 L136 111" stroke="#374151" stroke-width="3.2" stroke-linecap="round" fill="none" opacity="0"/>
+
+          <path d="M92 104 L113 106 M91 111 L112 111 M147 106 L168 104 M148 111 L169 111" stroke="#6b4f3a" stroke-width="2.3" stroke-linecap="round"/>
+        </g>
+      </svg>
     </div>
-    <section class="circle-wrap">
-      <div id="circle" class="circle"><div><div id="phase" class="phase">準備</div><div id="seconds" class="seconds">4</div></div></div>
-    </section>
-    <div id="progress" class="progress">0 / 4 セット</div>
-    <div class="buttons">
-      <button id="startBtn" class="primary">スタート</button>
-      <button id="resetBtn">リセット</button>
+  </section>
+
+  <section class="timer-wrap">
+    <div id="circle" class="circle">
+      <div><div id="phase" class="phase">準備</div><div id="seconds" class="seconds">4</div></div>
     </div>
-    <section class="settings">
-      <div class="row"><label for="cycles">セット数</label><select id="cycles"><option value="2">2</option><option value="4" selected>4</option><option value="6">6</option><option value="8">8</option></select></div>
-      <div class="row"><label for="sound">切り替え音</label><input id="sound" type="checkbox" checked /></div>
-      <div class="row"><label for="vibrate">振動</label><input id="vibrate" type="checkbox" checked /></div>
-      <div class="row"><label for="wake">画面をスリープさせない</label><input id="wake" type="checkbox" checked /></div>
-    </section>
-    <div class="hint">苦しさ・めまいを感じたら中止してください。振動と画面スリープ防止は対応ブラウザのみ有効です。</div>
-  </main>
+  </section>
+
+  <div id="progress" class="progress">0 / 4 セット</div>
+
+  <div class="buttons">
+    <button id="startBtn" class="primary">スタート</button>
+    <button id="resetBtn">リセット</button>
+  </div>
+
+  <section class="settings">
+    <div class="row"><label for="cycles">セット数</label><select id="cycles"><option value="2">2</option><option value="4" selected>4</option><option value="6">6</option><option value="8">8</option></select></div>
+    <div class="row"><label for="sound">切り替え音</label><input id="sound" type="checkbox" checked></div>
+    <div class="row"><label for="vibrate">振動</label><input id="vibrate" type="checkbox" checked></div>
+    <div class="row"><label for="wake">画面をスリープさせない</label><input id="wake" type="checkbox" checked></div>
+  </section>
+
+  <div class="hint">苦しさやめまいを感じたら中止してください。振動・画面スリープ防止は対応ブラウザのみ有効です。</div>
+</main>
+
 <script>
 (() => {
-  const phases=[{key:'inhale',label:'吸う',seconds:4},{key:'hold',label:'止める',seconds:7},{key:'exhale',label:'吐く',seconds:8}];
-  const els={circle:document.getElementById('circle'),phase:document.getElementById('phase'),seconds:document.getElementById('seconds'),progress:document.getElementById('progress'),startBtn:document.getElementById('startBtn'),resetBtn:document.getElementById('resetBtn'),cycles:document.getElementById('cycles'),sound:document.getElementById('sound'),vibrate:document.getElementById('vibrate'),wake:document.getElementById('wake')};
-  let timer=null,running=false,phaseIndex=0,remaining=4,completedCycles=0,hasStarted=false,wakeLock=null;
+  const phases=[
+    {key:'inhale',label:'吸う',seconds:4},
+    {key:'hold',label:'止める',seconds:7},
+    {key:'exhale',label:'吐く',seconds:8}
+  ];
+
+  const $=id=>document.getElementById(id);
+  const els={
+    circle:$('circle'),phase:$('phase'),seconds:$('seconds'),progress:$('progress'),
+    start:$('startBtn'),reset:$('resetBtn'),cycles:$('cycles'),sound:$('sound'),
+    vibrate:$('vibrate'),wake:$('wake'),bubble:$('bubble'),
+    body:$('body'),belly:$('belly'),pawL:$('pawL'),pawR:$('pawR'),
+    catBody:$('catBody'),catHead:$('catHead'),tail:$('tailBack'),tailLine:$('tailLine'),
+    eyeOpenL:$('eyeOpenL'),eyeOpenR:$('eyeOpenR'),eyeClosedL:$('eyeClosedL'),eyeClosedR:$('eyeClosedR'),
+    mouthSmile:$('mouthSmile'),mouthO:$('mouthO'),mouthFlat:$('mouthFlat'),
+    sparkles:$('sparkles'),wind:$('wind'),shadow:$('shadow')
+  };
+
+  let timer=null,running=false,phaseIndex=0,remaining=4,completed=0,started=false,wakeLock=null;
+  let frameIndex=0,flipTimer=null;
+
   const prefs=JSON.parse(localStorage.getItem('breath478prefs')||'{}');
-  ['cycles','sound','vibrate','wake'].forEach(k=>{if(prefs[k]!==undefined){if(els[k].type==='checkbox')els[k].checked=prefs[k];else els[k].value=prefs[k]}});
-  function savePrefs(){localStorage.setItem('breath478prefs',JSON.stringify({cycles:els.cycles.value,sound:els.sound.checked,vibrate:els.vibrate.checked,wake:els.wake.checked}))}
-  document.querySelectorAll('select,input').forEach(x=>x.addEventListener('change',()=>{savePrefs();updateUI()}));
-  function totalCycles(){return Number(els.cycles.value)}
-  function beep(freq=660,duration=.10){if(!els.sound.checked)return;try{const ctx=new(window.AudioContext||window.webkitAudioContext)();const osc=ctx.createOscillator(),gain=ctx.createGain();osc.frequency.value=freq;gain.gain.setValueAtTime(.05,ctx.currentTime);gain.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+duration);osc.connect(gain);gain.connect(ctx.destination);osc.start();osc.stop(ctx.currentTime+duration)}catch(e){}}
-  function vibrate(pattern=80){if(els.vibrate.checked&&navigator.vibrate)navigator.vibrate(pattern)}
-  async function requestWakeLock(){if(!els.wake.checked||!('wakeLock'in navigator))return;try{wakeLock=await navigator.wakeLock.request('screen');wakeLock.addEventListener('release',()=>{wakeLock=null})}catch(e){}}
-  async function releaseWakeLock(){if(wakeLock){try{await wakeLock.release()}catch(e){}wakeLock=null}}
-  function updateUI(){
-    if(completedCycles>=totalCycles()){els.circle.className='circle done';els.phase.textContent='完了';els.seconds.textContent='✓';els.progress.textContent=totalCycles()+' / '+totalCycles()+' セット';return}
-    const p=phases[phaseIndex];els.circle.className='circle '+(hasStarted?p.key:'');els.phase.textContent=hasStarted?(running?p.label:p.label+'・一時停止'):'準備';els.seconds.textContent=hasStarted?remaining:'4';els.progress.textContent=completedCycles+' / '+totalCycles()+' セット';els.startBtn.textContent=running?'一時停止':(hasStarted?'再開':'スタート')
+  ['cycles','sound','vibrate','wake'].forEach(k=>{
+    if(prefs[k]!==undefined){
+      if(els[k].type==='checkbox')els[k].checked=prefs[k]; else els[k].value=prefs[k];
+    }
+  });
+
+  document.querySelectorAll('select,input').forEach(el=>el.addEventListener('change',()=>{
+    localStorage.setItem('breath478prefs',JSON.stringify({
+      cycles:els.cycles.value,sound:els.sound.checked,vibrate:els.vibrate.checked,wake:els.wake.checked
+    }));
+    updateUI();
+  }));
+
+  const total=()=>Number(els.cycles.value);
+
+  function beep(freq=660,duration=.1){
+    if(!els.sound.checked)return;
+    try{
+      const ctx=new(window.AudioContext||window.webkitAudioContext)();
+      const osc=ctx.createOscillator(),gain=ctx.createGain();
+      osc.frequency.value=freq;gain.gain.setValueAtTime(.045,ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+duration);
+      osc.connect(gain);gain.connect(ctx.destination);osc.start();osc.stop(ctx.currentTime+duration);
+    }catch(e){}
   }
-  function advancePhase(){phaseIndex++;if(phaseIndex>=phases.length){phaseIndex=0;completedCycles++;if(completedCycles>=totalCycles()){finish();return}}remaining=phases[phaseIndex].seconds;beep(phaseIndex===2?520:700,.12);vibrate(100);updateUI()}
-  function tick(){remaining--;if(remaining<=0)advancePhase();else updateUI()}
-  async function start(){if(completedCycles>=totalCycles())reset();running=true;hasStarted=true;remaining=remaining||phases[phaseIndex].seconds;beep(760,.08);vibrate(60);await requestWakeLock();updateUI();clearInterval(timer);timer=setInterval(tick,1000)}
-  function pause(){running=false;clearInterval(timer);timer=null;releaseWakeLock();updateUI()}
-  function finish(){running=false;clearInterval(timer);timer=null;beep(880,.25);vibrate([120,80,180]);releaseWakeLock();updateUI();els.startBtn.textContent='もう一度'}
-  function reset(){running=false;clearInterval(timer);timer=null;phaseIndex=0;remaining=phases[0].seconds;completedCycles=0;hasStarted=false;releaseWakeLock();updateUI();els.startBtn.textContent='スタート'}
-  els.startBtn.addEventListener('click',()=>running?pause():start());els.resetBtn.addEventListener('click',reset);
-  document.addEventListener('visibilitychange',async()=>{if(document.visibilityState==='visible'&&running)await requestWakeLock()});
-  updateUI();
+  function buzz(p=70){if(els.vibrate.checked&&navigator.vibrate)navigator.vibrate(p)}
+  async function lockWake(){
+    if(!els.wake.checked||!('wakeLock'in navigator))return;
+    try{wakeLock=await navigator.wakeLock.request('screen');wakeLock.addEventListener('release',()=>wakeLock=null)}catch(e){}
+  }
+  async function unlockWake(){if(wakeLock){try{await wakeLock.release()}catch(e){}wakeLock=null}}
+
+  const tail={
+    low:"M179 150 C205 151 211 133 197 121",
+    mid:"M179 150 C213 145 218 113 197 98",
+    high:"M179 150 C218 137 222 94 196 77",
+    wiggle:"M179 150 C216 142 224 108 202 91"
+  };
+
+  const frames={
+    idle:[
+      {txt:'にゃ〜',sub:'いっしょに呼吸しよう',b:1.00,y:0,eyes:1,m:'smile',pl:-3,pr:3,t:'mid',w:0,s:.15},
+      {txt:'にゃ〜',sub:'いっしょに呼吸しよう',b:1.00,y:-1,eyes:1,m:'smile',pl:-1,pr:1,t:'wiggle',w:0,s:.16},
+      {txt:'にゃ〜',sub:'いっしょに呼吸しよう',b:1.00,y:0,eyes:0,m:'smile',pl:-3,pr:3,t:'mid',w:0,s:.14},
+      {txt:'にゃ〜',sub:'いっしょに呼吸しよう',b:1.00,y:0,eyes:1,m:'smile',pl:-3,pr:3,t:'low',w:0,s:.15}
+    ],
+    inhale:[
+      {txt:'すー',sub:'4秒で吸う',b:.94,y:2,eyes:1,m:'smile',pl:-9,pr:9,t:'low',w:0,s:.18},
+      {txt:'すー',sub:'4秒で吸う',b:.98,y:1,eyes:1,m:'smile',pl:-6,pr:6,t:'mid',w:0,s:.25},
+      {txt:'すー',sub:'4秒で吸う',b:1.03,y:-1,eyes:1,m:'smile',pl:-3,pr:3,t:'high',w:0,s:.36},
+      {txt:'すー',sub:'4秒で吸う',b:1.08,y:-3,eyes:0,m:'smile',pl:0,pr:0,t:'high',w:0,s:.5}
+    ],
+    hold:[
+      {txt:'きーぷ',sub:'7秒そのまま',b:1.08,y:-3,eyes:1,m:'flat',pl:0,pr:0,t:'high',w:0,s:.12},
+      {txt:'きーぷ',sub:'7秒そのまま',b:1.08,y:-3,eyes:0,m:'flat',pl:1,pr:-1,t:'wiggle',w:0,s:.1},
+      {txt:'きーぷ',sub:'7秒そのまま',b:1.08,y:-3,eyes:1,m:'smile',pl:0,pr:0,t:'high',w:0,s:.12}
+    ],
+    exhale:[
+      {txt:'ふー',sub:'8秒で吐く',b:1.06,y:-2,eyes:1,m:'o',pl:1,pr:-1,t:'high',w:.2,s:.05},
+      {txt:'ふー',sub:'8秒で吐く',b:1.02,y:-1,eyes:1,m:'o',pl:3,pr:-3,t:'mid',w:.45,s:.03},
+      {txt:'ふー',sub:'8秒で吐く',b:.98,y:0,eyes:0,m:'o',pl:5,pr:-5,t:'wiggle',w:.7,s:.02},
+      {txt:'ふー',sub:'8秒で吐く',b:.94,y:1,eyes:0,m:'o',pl:7,pr:-7,t:'low',w:.88,s:0},
+      {txt:'ふー',sub:'8秒で吐く',b:.91,y:2,eyes:1,m:'o',pl:9,pr:-9,t:'low',w:.96,s:0}
+    ],
+    done:[
+      {txt:'できたにゃ',sub:'おつかれさま',b:1.00,y:0,eyes:0,m:'smile',pl:-8,pr:8,t:'mid',w:0,s:.65},
+      {txt:'できたにゃ',sub:'おつかれさま',b:1.03,y:-3,eyes:1,m:'smile',pl:-11,pr:11,t:'high',w:0,s:.9},
+      {txt:'できたにゃ',sub:'おつかれさま',b:1.00,y:0,eyes:0,m:'smile',pl:-8,pr:8,t:'wiggle',w:0,s:.7}
+    ]
+  };
+
+  function setEyes(open){
+    els.eyeOpenL.style.opacity=open?1:0;els.eyeOpenR.style.opacity=open?1:0;
+    els.eyeClosedL.style.opacity=open?0:1;els.eyeClosedR.style.opacity=open?0:1;
+  }
+  function setMouth(m){
+    els.mouthSmile.style.opacity=m==='smile'?1:0;
+    els.mouthO.style.opacity=m==='o'?1:0;
+    els.mouthFlat.style.opacity=m==='flat'?1:0;
+  }
+  function setTail(t){els.tail.setAttribute('d',tail[t]);els.tailLine.setAttribute('d',tail[t])}
+
+  function renderCat(){
+    let key='idle';
+    if(completed>=total())key='done'; else if(started)key=phases[phaseIndex].key;
+    const seq=frames[key],f=seq[frameIndex%seq.length];
+    els.bubble.innerHTML=f.txt+'<small>'+f.sub+'</small>';
+    setEyes(f.eyes);setMouth(f.m);setTail(f.t);
+    els.catBody.setAttribute('transform','translate(0 '+f.y+') translate(130 143) scale('+f.b+' '+f.b+') translate(-130 -143)');
+    els.catHead.setAttribute('transform','translate(0 '+(f.y-(f.b-1)*8)+')');
+    els.pawL.setAttribute('transform','translate('+f.pl+' 0)');
+    els.pawR.setAttribute('transform','translate('+f.pr+' 0)');
+    els.wind.style.opacity=f.w;els.sparkles.style.opacity=f.s;
+    els.shadow.setAttribute('rx',String(59-(f.b-1)*24));
+  }
+
+  function startFlip(){
+    clearInterval(flipTimer);
+    flipTimer=setInterval(()=>{frameIndex++;renderCat()},220);
+  }
+
+  function updateUI(){
+    if(completed>=total()){
+      els.circle.className='circle done';els.phase.textContent='完了';els.seconds.textContent='✓';
+      els.progress.textContent=total()+' / '+total()+' セット';els.start.textContent='もう一度';renderCat();return;
+    }
+    const p=phases[phaseIndex];
+    els.circle.className='circle '+(started?p.key:'');
+    els.phase.textContent=started?(running?p.label:p.label+'・一時停止'):'準備';
+    els.seconds.textContent=started?remaining:'4';
+    els.progress.textContent=completed+' / '+total()+' セット';
+    els.start.textContent=running?'一時停止':(started?'再開':'スタート');
+    renderCat();
+  }
+
+  function advance(){
+    phaseIndex++;frameIndex=0;
+    if(phaseIndex>=phases.length){
+      phaseIndex=0;completed++;
+      if(completed>=total()){finish();return}
+    }
+    remaining=phases[phaseIndex].seconds;
+    beep(phaseIndex===2?520:700,.12);buzz(90);updateUI();
+  }
+
+  function tick(){remaining--;if(remaining<=0)advance();else updateUI()}
+
+  async function start(){
+    if(completed>=total())reset();
+    running=true;started=true;beep(760,.08);buzz(55);await lockWake();updateUI();
+    clearInterval(timer);timer=setInterval(tick,1000);
+  }
+  function pause(){running=false;clearInterval(timer);timer=null;unlockWake();updateUI()}
+  function finish(){running=false;clearInterval(timer);timer=null;beep(880,.24);buzz([110,80,160]);unlockWake();updateUI()}
+  function reset(){
+    running=false;clearInterval(timer);timer=null;phaseIndex=0;remaining=4;completed=0;started=false;frameIndex=0;
+    unlockWake();updateUI();
+  }
+
+  els.start.addEventListener('click',()=>running?pause():start());
+  els.reset.addEventListener('click',reset);
+  document.addEventListener('visibilitychange',async()=>{if(document.visibilityState==='visible'&&running)await lockWake()});
+
+  startFlip();updateUI();
 })();
 </script>
 </body>
